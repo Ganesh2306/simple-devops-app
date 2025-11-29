@@ -2,18 +2,23 @@ pipeline {
     agent any
 
     environment {
-        // Docker image name (change this to your Docker Hub username)
+        // Your Docker Hub image
         DOCKER_IMAGE = "ganeshmore/simple-devops-app:latest"
 
-        // Ansible files
+        // Ansible paths inside the repo
         ANSIBLE_INVENTORY = "ansible/inventory.ini"
-        ANSIBLE_PLAYBOOK = "ansible/deploy.yml"
+        ANSIBLE_PLAYBOOK  = "ansible/deploy.yml"
     }
 
-    stage('Checkout') {
-      steps {
-            echo "Code already checked out by Jenkins (Pipeline from SCM). Skipping extra git checkout."
-           }
+    stages {
+
+        stage('Checkout') {
+            steps {
+                // Jenkins (Pipeline from SCM) already checked out the code.
+                // We just print the workspace contents for confirmation.
+                echo "Source code already checked out by Jenkins (SCM). Listing files:"
+                sh 'pwd && ls -R'
+            }
         }
 
         stage('Build Docker Image') {
@@ -28,11 +33,13 @@ pipeline {
         stage('Docker Login') {
             steps {
                 echo "Logging in to Docker Hub..."
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     '''
@@ -42,7 +49,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                echo "Pushing Docker image to Docker Hub..."
+                echo "Pushing Docker image to Docker Hub: ${DOCKER_IMAGE}"
                 sh """
                     docker push ${DOCKER_IMAGE}
                 """
@@ -51,7 +58,7 @@ pipeline {
 
         stage('Deploy with Ansible') {
             steps {
-                echo "Running Ansible playbook to deploy to app server..."
+                echo "Deploying with Ansible using image: ${DOCKER_IMAGE}"
                 sh """
                     ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK} \
                       --extra-vars "docker_image_name=${DOCKER_IMAGE}"
