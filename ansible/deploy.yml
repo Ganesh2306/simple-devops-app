@@ -1,0 +1,58 @@
+---
+- name: Deploy Dockerized app to AWS EC2
+  hosts: app_servers
+  become: true   # run tasks with sudo
+
+  vars:
+    # For now, use nginx as a test image.
+    # Later, change this to your image from Docker Hub, for example:
+    # docker_image_name: "your-dockerhub-username/simple-devops-app:latest"
+    docker_image_name: "nginx:latest"
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Docker and dependencies
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - python3-pip
+        state: present
+
+    - name: Ensure docker service is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install Docker Python module (docker SDK)
+      ansible.builtin.command:
+        cmd: pip3 install docker --break-system-packages
+
+    - name: Pull Docker image
+      community.docker.docker_image:
+        name: "{{ docker_image_name }}"
+        source: pull
+
+    - name: Stop old container if running
+      community.docker.docker_container:
+        name: devops-web-app
+        state: stopped
+      ignore_errors: true
+
+    - name: Remove old container if exists
+      community.docker.docker_container:
+        name: devops-web-app
+        state: absent
+      ignore_errors: true
+
+    - name: Run new container
+      community.docker.docker_container:
+        name: devops-web-app
+        image: "{{ docker_image_name }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "80:80"
