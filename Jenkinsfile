@@ -3,20 +3,17 @@ pipeline {
 
     environment {
         // Docker image name (change this to your Docker Hub username)
-        DOCKER_IMAGE = "your-dockerhub-username/simple-devops-app:latest"
+        DOCKER_IMAGE = "ganeshmore/simple-devops-app:latest"
 
         // Ansible files
         ANSIBLE_INVENTORY = "ansible/inventory.ini"
         ANSIBLE_PLAYBOOK = "ansible/deploy.yml"
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                echo "Checking out code from GitHub..."
-                // Jenkins will override this if using 'Pipeline script from SCM'
-                git branch: 'main', url: 'https://github.com/your-github-username/simple-devops-app.git'
-            }
+    stage('Checkout') {
+      steps {
+            echo "Code already checked out by Jenkins (Pipeline from SCM). Skipping extra git checkout."
+           }
         }
 
         stage('Build Docker Image') {
