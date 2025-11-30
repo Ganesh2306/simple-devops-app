@@ -14,8 +14,6 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Jenkins (Pipeline from SCM) already checked out the code.
-                // We just print the workspace contents for confirmation.
                 echo "Source code already checked out by Jenkins (SCM). Listing files:"
                 sh 'pwd && ls -R'
             }
@@ -35,9 +33,10 @@ pipeline {
                 echo "Logging in to Docker Hub..."
                 withCredentials([
                     usernamePassword(
+                        // 👇 USE THE ID YOU SAW IN JENKINS UI
                         credentialsId: '94d73f9c-5f13-4df9-8347-458fd55aa806',
-                           usernameVariable: 'DOCKER_USER' ,
-                           passwordVariable: 'DOCKER_PASS'
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
                     sh '''
@@ -67,4 +66,4 @@ pipeline {
         }
     }
 }
-
+               
