@@ -35,9 +35,9 @@ pipeline {
                 echo "Logging in to Docker Hub..."
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
+                        credentialsId: '94d73f9c-5f13-4df9-8347-458fd55aa806',
+                           usernameVariable: 'DOCKER_USER' ,
+                           passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
                     sh '''
