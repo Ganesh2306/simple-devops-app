@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Your Docker Hub image
-        DOCKER_IMAGE = "ganeshmore/simple-devops-app:latest"
+        DOCKER_IMAGE = "gm2306/simple-devops-app:latest"
 
         // Ansible paths inside the repo
         ANSIBLE_INVENTORY = "ansible/inventory.ini"
